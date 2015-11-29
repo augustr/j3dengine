@@ -1,8 +1,5 @@
 package gfx.opengl;
 
-import javax.media.opengl.GL;
-import javax.media.opengl.GL2;
-
 import gfx.*;
 
 /**
@@ -31,7 +28,7 @@ public class OpenGLSprite extends AbstractSprite
     public void render(float x, float y, float alpha, float rotation, float scaleX, float scaleY)
     {
         System.out.println("render sprite");
-        GL2 gl2 = this.renderer.getGL().getGL2();
+        /*GL2 gl2 = this.renderer.getGL().getGL2();
 
         // Simple triangle
         gl2.glBegin(GL.GL_TRIANGLES);
@@ -42,6 +39,6 @@ public class OpenGLSprite extends AbstractSprite
         gl2.glVertex2f(0, 1);
         gl2.glColor3f(0, 0, 1);
         gl2.glVertex2f(1, -1);
-        gl2.glEnd();
+        gl2.glEnd();*/
     }
 }
