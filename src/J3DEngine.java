@@ -25,6 +25,7 @@ public class J3DEngine implements GLEventListener {
 
     private int imageWidth = 800;
     private int imageHeight = 600;
+    private float rotation = 0;
     private GLCanvas canvas;
     //private GLSLProgramObject programObject;
     private int[] positionBufferObject = new int[1];
@@ -79,6 +80,15 @@ public class J3DEngine implements GLEventListener {
 
         canvas.setAutoSwapBufferMode(false);
 
+        while(true) {
+            try {
+                Thread.sleep(10);
+            }
+            catch (Exception e) {
+                System.out.println("Exception");
+            }
+            this.canvas.display();
+        }
         /*GL3 gl3 = glad.getGL().getGL3();
 
         initializeVertexBuffer(gl3);
@@ -96,6 +106,7 @@ public class J3DEngine implements GLEventListener {
     public void display(GLAutoDrawable glad) {
         System.out.println("display");
 
+        rotation += 0.05f;
         GL2 gl2 = glad.getGL().getGL2();
 
         gl2.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -103,7 +114,7 @@ public class J3DEngine implements GLEventListener {
 
         gl2.glBegin(GL2.GL_TRIANGLES);
         gl2.glColor3f(1, 0, 0);
-        //gl2.glVertex2f((float)Math.cos(rotation), (float)Math.sin(rotation));
+        gl2.glVertex2f((float)Math.cos(rotation), (float)Math.sin(rotation));
         gl2.glVertex2f(-1.0f, -1.0f);
         gl2.glColor3f(0, 1, 0);
         gl2.glVertex2f(0, 1);
