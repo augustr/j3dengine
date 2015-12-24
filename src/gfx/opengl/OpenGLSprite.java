@@ -1,5 +1,7 @@
 package gfx.opengl;
 
+import com.jogamp.opengl.*;
+
 import gfx.*;
 
 /**
@@ -27,18 +29,16 @@ public class OpenGLSprite extends AbstractSprite
 
     public void render(float x, float y, float alpha, float rotation, float scaleX, float scaleY)
     {
-        System.out.println("render sprite");
-        /*GL2 gl2 = this.renderer.getGL().getGL2();
+        GL2 gl2 = this.renderer.getGLAutoDrawable().getGL().getGL2();
 
         // Simple triangle
         gl2.glBegin(GL.GL_TRIANGLES);
         gl2.glColor3f(1, 0, 0);
-        //gl2.glVertex2f((float)Math.cos(rotation), (float)Math.sin(rotation));
-        gl2.glVertex2f(-1.0f, -1.0f);
+        gl2.glVertex2f((float)Math.cos(rotation), (float)Math.sin(rotation));
         gl2.glColor3f(0, 1, 0);
-        gl2.glVertex2f(0, 1);
+        gl2.glVertex2f((float)Math.cos(rotation+Math.PI/3*2), (float)Math.sin(rotation+Math.PI/3*2));
         gl2.glColor3f(0, 0, 1);
-        gl2.glVertex2f(1, -1);
-        gl2.glEnd();*/
+        gl2.glVertex2f((float)Math.cos(rotation+Math.PI/3*4), (float)Math.sin(rotation+Math.PI/3*4));
+        gl2.glEnd();
     }
 }
