@@ -4,31 +4,19 @@ import com.jogamp.opengl.*;
 
 import gfx.*;
 
-/**
- * Created by august on 2015-04-05.
- */
-public class OpenGLSprite extends AbstractSprite
-{
+public class OpenGLSprite extends AbstractSprite {
     protected OpenGLRenderer renderer = null;
 
-    public OpenGLSprite(OpenGLRenderer renderer, String filename, int width, int height)
-    {
+    public OpenGLSprite(OpenGLRenderer renderer, String filename, int width, int height) {
         super(renderer, filename, width, height);
         this.renderer = renderer;
     }
 
-    public void close()
-    {
-
-    }
-
-    public void render(float x, float y)
-    {
+    public void render(float x, float y) {
         this.render(x,y,1.0f,0.0f,1.0f,1.0f);
     }
 
-    public void render(float x, float y, float alpha, float rotation, float scaleX, float scaleY)
-    {
+    public void render(float x, float y, float alpha, float rotation, float scaleX, float scaleY) {
         GL2 gl2 = this.renderer.getGLAutoDrawable().getGL().getGL2();
 
         // Simple triangle

@@ -1,6 +1,5 @@
 package gfx;
 
-public interface IAbstractRenderThreadCallbackListener
-{
+public interface IAbstractRenderThreadCallbackListener {
     public void renderThread();
 }

@@ -1,8 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 import java.awt.Frame;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -11,48 +6,44 @@ import java.awt.Canvas;
 import gfx.*;
 import gfx.opengl.*;
 
-/**
- *
- * @author gbarbieri
- */
 public class J3DEngine implements IAbstractRenderThreadCallbackListener {
 
     private AbstractRenderer renderer = null;
-    private boolean initialized = false;
-    private int imageWidth = 800;
-    private int imageHeight = 600;
-    private float rotation = 0;
+    private int              width    = 800;
+    private int              height   = 600;
+    private float            rotation = 0;
+    private boolean          running  = false;
 
-    /**
-     * @param args the command line arguments
-     */
     public static void main(String[] args) {
-        J3DEngine engine = new J3DEngine();
+        final J3DEngine engine = new J3DEngine();
 
-        Frame frame = new Frame("Tutorial 01");
+        final Frame frame = new Frame("J3DEngine");
 
         frame.add(engine.getCanvas());
-
         frame.setSize(engine.getCanvas().getWidth(), engine.getCanvas().getHeight());
-
+        frame.setVisible(true);
         frame.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent windowEvent) {
+                engine.stop();
+                frame.remove(engine.getCanvas());
+                frame.dispose();
                 System.exit(0);
             }
         });
-
-        frame.setVisible(true);
     }
 
     public J3DEngine() {
 
-        this.renderer = new OpenGLRenderer(800, 600);
+        this.renderer = new OpenGLRenderer(this.width, this.height);
         this.renderer.addRenderThreadCallbackListener(this);
     }
 
-    public Canvas getCanvas()
-    {
+    public void stop() {
+        this.running = false;
+    }
+
+    public Canvas getCanvas() {
         return this.renderer.getCanvas();
     }
 
@@ -62,12 +53,13 @@ public class J3DEngine implements IAbstractRenderThreadCallbackListener {
         float rotation = 0.0f;
 
         // Main loop
-        while(true) {
-            rotation += Math.PI/180;
+        this.running = true;
+        while(this.running) {
+            rotation += Math.PI/180*2;
             if (rotation > 2*Math.PI) { rotation = 0.0f; }
 
             this.renderer.beginRender();
-            sprite.render(0.0f, 0.0f,1.0f,rotation,1.0f,1.0f);
+            sprite.render(0.0f, 0.0f, 1.0f, rotation, 1.0f, 1.0f);
             this.renderer.endRender();
             try {
                 Thread.sleep(10);
@@ -76,5 +68,7 @@ public class J3DEngine implements IAbstractRenderThreadCallbackListener {
                 e.printStackTrace();
             }
         }
+
+        this.renderer.close();
     }
 }
