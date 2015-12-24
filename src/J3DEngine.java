@@ -1,10 +1,7 @@
-import java.awt.Frame;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.awt.Canvas;
-
 import gfx.*;
 import gfx.opengl.*;
+
+import com.jogamp.opengl.*;
 
 public class J3DEngine implements IAbstractRenderThreadCallbackListener {
 
@@ -15,22 +12,8 @@ public class J3DEngine implements IAbstractRenderThreadCallbackListener {
     private boolean          running  = false;
 
     public static void main(String[] args) {
+        GLProfile.initSingleton();
         final J3DEngine engine = new J3DEngine();
-
-        final Frame frame = new Frame("J3DEngine");
-
-        frame.add(engine.getCanvas());
-        frame.setSize(engine.getCanvas().getWidth(), engine.getCanvas().getHeight());
-        frame.setVisible(true);
-        frame.addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowClosing(WindowEvent windowEvent) {
-                engine.stop();
-                frame.remove(engine.getCanvas());
-                frame.dispose();
-                System.exit(0);
-            }
-        });
     }
 
     public J3DEngine() {
@@ -41,10 +24,6 @@ public class J3DEngine implements IAbstractRenderThreadCallbackListener {
 
     public void stop() {
         this.running = false;
-    }
-
-    public Canvas getCanvas() {
-        return this.renderer.getCanvas();
     }
 
     public void renderThread() {

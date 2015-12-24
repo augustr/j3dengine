@@ -1,15 +1,14 @@
 package gfx.opengl;
 
 import com.jogamp.opengl.*;
-import com.jogamp.opengl.awt.GLCanvas;
-
-import java.awt.*;
+import com.jogamp.newt.event.WindowAdapter;
+import com.jogamp.newt.event.WindowEvent;
+import com.jogamp.newt.opengl.GLWindow;
 
 import gfx.*;
 
 public class OpenGLRenderer extends AbstractRenderer implements GLEventListener {
     private IAbstractRenderThreadCallbackListener renderThreadListener = null;
-    private GLCanvas                              canvas               = null;
     private GLAutoDrawable                        glad                 = null;
     private int                                   width                = 800;
     private int                                   height               = 600;
@@ -26,14 +25,19 @@ public class OpenGLRenderer extends AbstractRenderer implements GLEventListener 
         GLProfile      profile      = GLProfile.get(GLProfile.GL2);
         GLCapabilities capabilities = new GLCapabilities(profile);
 
-        canvas = new GLCanvas(capabilities);
-        canvas.setSize(width, height);
-        canvas.addGLEventListener(this);
-        canvas.setAutoSwapBufferMode(false);
-    }
+        GLWindow window = GLWindow.create(capabilities);
+        window.setSize(width, height);
+        window.setVisible(true);
+        window.setTitle("J3DEngine");
 
-    public Canvas getCanvas() {
-        return canvas;
+        window.addWindowListener(new WindowAdapter() {
+            public void windowDestroyNotify(WindowEvent arg0) {
+                System.out.println("destroy");
+                System.exit(0);
+            };
+        });
+
+        window.setAutoSwapBufferMode(false);
     }
 
     public GLAutoDrawable getGLAutoDrawable() {
