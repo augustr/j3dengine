@@ -15,23 +15,28 @@ public class OpenGLRenderer extends AbstractRenderer implements GLEventListener 
 
     public OpenGLRenderer(int width, int height) {
         super(width, height);
-        this.setupOpenGL(width, height);
-    }
 
-    protected void setupOpenGL(int width, int height) {
         this.width  = width;
         this.height = height;
+    }
 
+    public void create() {
+        this.setupOpenGL();
+    }
+
+    protected void setupOpenGL() {
         GLProfile      profile      = GLProfile.get(GLProfile.GL2);
         GLCapabilities capabilities = new GLCapabilities(profile);
 
-        GLWindow window = GLWindow.create(capabilities);
-        window.setSize(width, height);
+        final GLWindow window = GLWindow.create(capabilities);
+        window.addGLEventListener(this);
+        window.setSize(this.width, this.height);
         window.setVisible(true);
-        window.setTitle("J3DEngine");
+        window.setTitle("OpenGLRenderer");
 
         window.addWindowListener(new WindowAdapter() {
             public void windowDestroyNotify(WindowEvent arg0) {
+                window.destroy();
                 System.out.println("destroy");
                 System.exit(0);
             };

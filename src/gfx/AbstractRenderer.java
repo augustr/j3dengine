@@ -6,6 +6,7 @@ import java.awt.*;
 public abstract class AbstractRenderer {
     public AbstractRenderer(int width, int height) { };
 
+    public abstract void           create();
     public abstract void           addRenderThreadCallbackListener(IAbstractRenderThreadCallbackListener listener);
     public abstract void           close();
     public abstract AbstractSprite createSprite(String filename, int width, int height);

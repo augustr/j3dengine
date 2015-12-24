@@ -17,9 +17,9 @@ public class J3DEngine implements IAbstractRenderThreadCallbackListener {
     }
 
     public J3DEngine() {
-
         this.renderer = new OpenGLRenderer(this.width, this.height);
         this.renderer.addRenderThreadCallbackListener(this);
+        this.renderer.create();
     }
 
     public void stop() {
