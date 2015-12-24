@@ -1,8 +1,6 @@
 import gfx.*;
 import gfx.opengl.*;
 
-import com.jogamp.opengl.*;
-
 public class J3DEngine implements IAbstractRenderThreadCallbackListener {
 
     private AbstractRenderer renderer = null;
@@ -12,7 +10,6 @@ public class J3DEngine implements IAbstractRenderThreadCallbackListener {
     private boolean          running  = false;
 
     public static void main(String[] args) {
-        GLProfile.initSingleton();
         final J3DEngine engine = new J3DEngine();
     }
 
@@ -40,12 +37,7 @@ public class J3DEngine implements IAbstractRenderThreadCallbackListener {
             this.renderer.beginRender();
             sprite.render(0.0f, 0.0f, 1.0f, rotation, 1.0f, 1.0f);
             this.renderer.endRender();
-            try {
-                Thread.sleep(10);
-            }
-            catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            Thread.yield();
         }
 
         this.renderer.close();

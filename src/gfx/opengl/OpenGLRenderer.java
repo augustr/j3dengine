@@ -13,6 +13,8 @@ public class OpenGLRenderer extends AbstractRenderer implements GLEventListener 
     private int                                   width                = 800;
     private int                                   height               = 600;
 
+    static { GLProfile.initSingleton(); }
+
     public OpenGLRenderer(int width, int height) {
         super(width, height);
 
