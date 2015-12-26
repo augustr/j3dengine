@@ -28,9 +28,9 @@ public class OpenGLLandscape {
         for(int x = 0; x < heightMap.getWidth(); x++) {
             for(int y = 0; y < heightMap.getHeight(); y++) {
                 float z = heightMap.getZ(x,y);
-                vertexBuffer.put((float)x*0.1f);
-                vertexBuffer.put((float)y*0.1f);
-                vertexBuffer.put(z/256.0f*10.0f);
+                vertexBuffer.put((float)x*0.02f);
+                vertexBuffer.put((float)y*0.02f);
+                vertexBuffer.put(z/256.0f*1.0f);
 
                 this.vertexCount++;
             }

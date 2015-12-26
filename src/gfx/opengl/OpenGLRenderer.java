@@ -23,9 +23,9 @@ public class OpenGLRenderer extends AbstractRenderer implements GLEventListener,
     private int                                   height               = 600;
     private float theta = 0.0f;
     private float phi   = 0.0f;
-    private float x     = 3.25f;
-    private float y     = 8.88f;
-    private float z     = 3.24f;
+    private float x     = 3.25f*0.2f;
+    private float y     = 8.88f*0.2f;
+    private float z     = 3.24f*0.2f;
 
     static { GLProfile.initSingleton(); }
 
@@ -98,6 +98,7 @@ public class OpenGLRenderer extends AbstractRenderer implements GLEventListener,
 
         float r = 10f;
         GLU glu = new GLU();
+        glu.gluPerspective( 90, this.width/this.height, 0.1, 1000.0 );
         glu.gluLookAt(x,
                 y,
                 z,
@@ -134,7 +135,7 @@ public class OpenGLRenderer extends AbstractRenderer implements GLEventListener,
     }
 
     // MouseListener
-    public void mouseDragged(MouseEvent e) {
+    public void mouseMoved(MouseEvent e) {
 
     }
 
@@ -169,9 +170,9 @@ public class OpenGLRenderer extends AbstractRenderer implements GLEventListener,
     }
 
     @Override
-    public void mouseMoved(MouseEvent e) {
-        theta = (float) e.getX() * 0.01f;
-        phi   = (float) e.getY() * 0.01f;
+    public void mouseDragged(MouseEvent e) {
+        theta = (float) e.getX() * -0.01f;
+        phi   = (float) e.getY() * -0.01f;
     }
 
     public void keyTyped(KeyEvent arg0) {}
