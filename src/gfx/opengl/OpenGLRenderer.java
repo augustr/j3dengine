@@ -23,9 +23,9 @@ public class OpenGLRenderer extends AbstractRenderer implements GLEventListener,
     private int                                   height               = 600;
     private float theta = 0.0f;
     private float phi   = 0.0f;
-    private float x     = 3.25f*0.2f;
-    private float y     = 8.88f*0.2f;
-    private float z     = 3.24f*0.2f;
+    private float x     = 3.25f*2.0f;
+    private float y     = 8.88f*2.0f;
+    private float z     = 3.24f*2.0f;
 
     static { GLProfile.initSingleton(); }
 
@@ -86,7 +86,7 @@ public class OpenGLRenderer extends AbstractRenderer implements GLEventListener,
         GL2 gl2 = this.glad.getGL().getGL2();
 
         gl2.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-        gl2.glClear(GL2.GL_COLOR_BUFFER_BIT);
+        gl2.glClear(GL2.GL_COLOR_BUFFER_BIT | GL2.GL_DEPTH_BUFFER_BIT);
 
         gl2.glLoadIdentity();
 
@@ -98,10 +98,12 @@ public class OpenGLRenderer extends AbstractRenderer implements GLEventListener,
 
         float r = 10f;
         GLU glu = new GLU();
-        glu.gluPerspective( 90, this.width/this.height, 0.1, 1000.0 );
+        gl2.glMatrixMode(GL2.GL_PROJECTION);
+        gl2.glLoadIdentity();
+        glu.gluPerspective(90, this.width/this.height, 0.1, 1000.0);
         glu.gluLookAt(x,
-                y,
-                z,
+                      y,
+                      z,
                       1.0f*(x+r*Math.sin(phi)*Math.cos(theta)),
                       1.0f*(y+r*Math.sin(theta)*Math.sin(phi)),
                       1.0f*(z+r*Math.cos(phi)),
@@ -109,13 +111,17 @@ public class OpenGLRenderer extends AbstractRenderer implements GLEventListener,
     }
 
     public void endRender() {
-        GL2 gl2 = this.glad.getGL().getGL2();
         this.glad.swapBuffers();
     }
 
     @Override
     public void init(GLAutoDrawable glad) {
         this.glad = glad;
+        GL2 gl2 = this.glad.getGL().getGL2();
+        gl2.glFrontFace​(GL.GL_CCW);
+        gl2.glEnable(GL.GL_CULL_FACE);
+        gl2.glCullFace(GL.GL_BACK);
+        gl2.glEnable(GL.GL_DEPTH_TEST);
         this.renderThreadListener.initialize();
     }
 
@@ -183,8 +189,8 @@ public class OpenGLRenderer extends AbstractRenderer implements GLEventListener,
         {
             case KeyEvent.VK_LEFT:  x=x-0.1f     ; break;
             case KeyEvent.VK_RIGHT: x=x+0.1f     ; break;
-            case KeyEvent.VK_UP:    y=y-0.1f     ; break;
-            case KeyEvent.VK_DOWN:  y=y+0.1f     ; break;
+            case KeyEvent.VK_UP:    z=z-0.1f     ; break;
+            case KeyEvent.VK_DOWN:  z=z+0.1f     ; break;
         }
     }
 
