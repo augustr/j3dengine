@@ -12,8 +12,6 @@ import gfx.HeightMap;
 public class OpenGLLandscape {
     private int[]          vertexHandle       = new int[1];
     private int            vertexCount        = 0;
-    private int[]          textureHandle      = new int[1];
-    private int            textureCount       = 0;
     private int[]          indexHandle        = new int[1];
     private int            indexCount         = 0;
     private int[]          colorHandle        = new int[1];
@@ -22,9 +20,11 @@ public class OpenGLLandscape {
     private OpenGLRenderer renderer           = null;
 
     public OpenGLLandscape(OpenGLRenderer renderer, HeightMap heightMap) {
-        FloatBuffer vertexBuffer  = Buffers.newDirectFloatBuffer(heightMap.getWidth()*heightMap.getHeight()*3);
+        // @todo Split this function into many. One for each buffer type and then functions for calculating normals, shading etc.
+        // @todo In the long run: Take out the buffer generation code and place it in generic Landscape class. Make this
+        // a very generic OpenGLObject class inheriting an AbstractObject (or Abstract3DModel or similar)
+        FloatBuffer vertexBuffer  = Buffers.newDirectFloatBuffer(heightMap.getWidth()*heightMap.getHeight()*8);
         FloatBuffer colorBuffer   = Buffers.newDirectFloatBuffer(heightMap.getWidth()*heightMap.getHeight()*3);
-        FloatBuffer textureBuffer = Buffers.newDirectFloatBuffer(heightMap.getWidth()*heightMap.getHeight()*2);
         IntBuffer   indexBuffer   = Buffers.newDirectIntBuffer(6*(heightMap.getWidth()-1)*(heightMap.getHeight()-1));
         GL2         gl2           = renderer.getGLAutoDrawable().getGL().getGL2();
 
@@ -45,37 +45,79 @@ public class OpenGLLandscape {
 
 
         // Create buffers
-        float fScale  = 1.0f;
-        float fHScale = 0.2f*fScale;
-        float fVScale = 10.0f*fScale;
+        float scale    = 1.0f;
+        float hScale   = 0.2f*scale;
+        float vScale   = 10.0f*scale;
+        float texScale = 0.5f*hScale;
 
-        // Create vertex and texture buffer
+        // Create vertex, normal and texture buffer
         for(int x = 0; x < heightMap.getWidth(); x++) {
             for(int y = 0; y < heightMap.getHeight(); y++) {
                 float z = heightMap.getZ(x,y);
-                vertexBuffer.put((float)x*fHScale);
-                vertexBuffer.put((float)y*fHScale);
-                vertexBuffer.put(z/256.0f*fVScale);
 
-                textureBuffer.put(0.5f*x*fHScale);
-                textureBuffer.put(0.5f*y*fHScale);
+                // Vertex coordinates
+                vertexBuffer.put((float)x*hScale);
+                vertexBuffer.put((float)y*hScale);
+                vertexBuffer.put(z/256.0f*vScale);
+
+                // Normal coordinates
+                // Only reserve space for normals. Calculate them later when index buffer is created
+                vertexBuffer.put(0.0f);
+                vertexBuffer.put(0.0f);
+                vertexBuffer.put(0.0f);
+
+                // Texture coordinates
+                vertexBuffer.put(x*texScale);
+                vertexBuffer.put(y*texScale);
 
                 this.vertexCount++;
             }
         }
         vertexBuffer.flip();
-        textureBuffer.flip();
 
         // Create and load data into GL buffers
         gl2.glGenBuffers(1, this.vertexHandle, 0);
         gl2.glBindBuffer(GL.GL_ARRAY_BUFFER, this.vertexHandle[0]);
-        gl2.glBufferData(GL.GL_ARRAY_BUFFER, this.vertexCount * 3 *
+        gl2.glBufferData(GL.GL_ARRAY_BUFFER, this.vertexCount * 8 *
                 Buffers.SIZEOF_FLOAT, vertexBuffer, GL.GL_STATIC_DRAW);
 
-        gl2.glGenBuffers(1, this.textureHandle, 0);
-        gl2.glBindBuffer(GL.GL_ARRAY_BUFFER, this.textureHandle[0]);
-        gl2.glBufferData(GL.GL_ARRAY_BUFFER, this.vertexCount * 2 *
-                Buffers.SIZEOF_FLOAT, textureBuffer, GL.GL_STATIC_DRAW);
+        // Create index buffer
+        long xIndexes = heightMap.getWidth()-1;
+        long yIndexes = heightMap.getHeight()-1;
+
+        for (int x = 0; x < xIndexes; x++) {
+            for (int y = 0; y < yIndexes; y++) {
+                // First triangle
+                int t11 = x * heightMap.getHeight() + y;
+                int t12 = (x + 1) * heightMap.getHeight() + y;
+                int t13 = x * heightMap.getHeight() + y + 1;
+
+                indexBuffer.put(t11);
+                indexBuffer.put(t12);
+                indexBuffer.put(t13);
+
+                // Normal
+
+
+                // Second triangle
+                int t21 = (x + 1) * heightMap.getHeight() + y;
+                int t22 = (x + 1) * heightMap.getHeight() + y + 1;
+                int t23 = x * heightMap.getHeight() + y + 1;
+
+                indexBuffer.put(t21);
+                indexBuffer.put(t22);
+                indexBuffer.put(t23);
+
+                this.indexCount += 6;
+            }
+        }
+
+        indexBuffer.flip();
+
+        // Create and load index buffer data into GL buffer
+        gl2.glGenBuffers(1, this.indexHandle, 0);
+        gl2.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, this.indexHandle[0]);
+        gl2.glBufferData(GL.GL_ELEMENT_ARRAY_BUFFER, this.indexCount * Buffers.SIZEOF_INT, indexBuffer, GL.GL_STATIC_DRAW);
 
         // Create color buffer
         for(int x = 0; x < heightMap.getWidth(); x++) {
@@ -96,36 +138,8 @@ public class OpenGLLandscape {
         gl2.glBufferData(GL.GL_ARRAY_BUFFER, this.colorCount * 3 *
                 Buffers.SIZEOF_FLOAT, colorBuffer, GL.GL_STATIC_DRAW);
 
-        // Create index buffer
-        long xIndexes = heightMap.getWidth()-1;
-        long yIndexes = heightMap.getHeight()-1;
-
-        for (int x = 0; x < xIndexes; x++) {
-            for (int y = 0; y < yIndexes; y++) {
-                // First triangle
-                indexBuffer.put(x * heightMap.getHeight() + y);
-                indexBuffer.put((x + 1) * heightMap.getHeight() + y);
-                indexBuffer.put(x * heightMap.getHeight() + y + 1);
-
-                // Second triangle
-                indexBuffer.put((x + 1) * heightMap.getHeight() + y);
-                indexBuffer.put((x + 1) * heightMap.getHeight() + y + 1);
-                indexBuffer.put(x * heightMap.getHeight() + y + 1);
-
-                this.indexCount += 6;
-            }
-        }
-
-        indexBuffer.flip();
-
-        // Create and load index buffer data into GL buffer
-        gl2.glGenBuffers(1, this.indexHandle, 0);
-        gl2.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, this.indexHandle[0]);
-        gl2.glBufferData(GL.GL_ELEMENT_ARRAY_BUFFER, this.indexCount * Buffers.SIZEOF_INT, indexBuffer, GL.GL_STATIC_DRAW);
-
         // Data is now copied to GPU memory. Clear local data
         vertexBuffer  = null;
-        textureBuffer = null;
         colorBuffer   = null;
         indexBuffer   = null;
     }
@@ -138,9 +152,9 @@ public class OpenGLLandscape {
         gl2.glEnableClientState(GL2.GL_TEXTURE_COORD_ARRAY);
 
         gl2.glBindBuffer(GL.GL_ARRAY_BUFFER, this.vertexHandle[0]);
-        gl2.glVertexPointer(3, GL.GL_FLOAT, 0, 0);
-        gl2.glBindBuffer(GL.GL_ARRAY_BUFFER, this.textureHandle[0]);
-        gl2.glTexCoordPointer(2, GL.GL_FLOAT, 0, 0);
+        gl2.glVertexPointer(3, GL.GL_FLOAT, 8*Buffers.SIZEOF_FLOAT, 0);
+        gl2.glBindBuffer(GL.GL_ARRAY_BUFFER, this.vertexHandle[0]);
+        gl2.glTexCoordPointer(2, GL.GL_FLOAT, 8*Buffers.SIZEOF_FLOAT, 6*Buffers.SIZEOF_FLOAT);
         gl2.glBindBuffer(GL.GL_ARRAY_BUFFER, this.colorHandle[0]);
         gl2.glColorPointer(3, GL.GL_FLOAT, 0, 0);
 
