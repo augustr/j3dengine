@@ -21,6 +21,8 @@ public class OpenGLRenderer extends AbstractRenderer implements GLEventListener,
     private GLAutoDrawable                        glad                 = null;
     private int                                   width                = 800;
     private int                                   height               = 600;
+    private int lastMouseX = 0;
+    private int lastMouseY = 0;
     private float theta = 0.0f;
     private float phi   = 0.0f;
     private float x     = 3.25f*2.0f;
@@ -122,6 +124,7 @@ public class OpenGLRenderer extends AbstractRenderer implements GLEventListener,
         gl2.glEnable(GL.GL_CULL_FACE);
         gl2.glCullFace(GL.GL_BACK);
         gl2.glEnable(GL.GL_DEPTH_TEST);
+        gl2.glShadeModel(GL2.GL_SMOOTH);
         this.renderThreadListener.initialize();
     }
 
@@ -167,7 +170,8 @@ public class OpenGLRenderer extends AbstractRenderer implements GLEventListener,
 
     @Override
     public void mousePressed(MouseEvent e) {
-
+        lastMouseX = e.getX();
+        lastMouseY = e.getY();
     }
 
     @Override
@@ -177,8 +181,10 @@ public class OpenGLRenderer extends AbstractRenderer implements GLEventListener,
 
     @Override
     public void mouseDragged(MouseEvent e) {
-        theta = (float) e.getX() * -0.01f;
-        phi   = (float) e.getY() * -0.01f;
+        theta += (float) (e.getX()-lastMouseX) * 0.002f;
+        phi   -= (float) (e.getY()-lastMouseY) * 0.002f;
+        lastMouseX = e.getX();
+        lastMouseY = e.getY();
     }
 
     public void keyTyped(KeyEvent arg0) {}
