@@ -4,12 +4,15 @@ import com.jogamp.opengl.*;
 
 import gfx.*;
 
-public class OpenGLSprite extends AbstractSprite {
+public class OpenGLSprite implements Sprite {
     protected OpenGLRenderer renderer = null;
 
-    public OpenGLSprite(OpenGLRenderer renderer, String filename, int width, int height) {
-        super(renderer, filename, width, height);
-        this.renderer = renderer;
+    public OpenGLSprite() {
+
+    }
+
+    public void initialize(Renderer renderer, String filename, int width, int height) {
+        this.renderer = (OpenGLRenderer) renderer;
     }
 
     public void render(float x, float y) {

@@ -9,47 +9,41 @@ import com.jogamp.newt.opengl.GLWindow;
 
 import com.jogamp.newt.event.MouseListener;
 import com.jogamp.newt.event.MouseEvent;
-import com.jogamp.newt.event.MouseAdapter;
 import com.jogamp.newt.event.KeyListener;
 import com.jogamp.newt.event.KeyEvent;
-import java.util.Random;
 
 import gfx.*;
 
-public class OpenGLRenderer extends AbstractRenderer implements GLEventListener, MouseListener, KeyListener {
-    private IAbstractRenderThreadCallbackListener renderThreadListener = null;
-    private GLAutoDrawable                        glad                 = null;
-    private int                                   width                = 800;
-    private int                                   height               = 600;
-    private int lastMouseX = 0;
-    private int lastMouseY = 0;
-    private float theta = 0.0f;
-    private float phi   = 0.0f;
-    private float x     = 3.25f*2.0f;
-    private float y     = 8.88f*2.0f;
-    private float z     = 3.24f*2.0f;
+public class OpenGLRenderer implements Renderer, GLEventListener, MouseListener, KeyListener {
+    private AnimateCallbackListener     animateListener = null;
+    private GLAutoDrawable              glad            = null;
+    private int                         width           = 800;
+    private int                         height          = 600;
+    private int                         lastMouseX      = 0;
+    private int                         lastMouseY      = 0;
+    private float                       theta           = 0.0f;
+    private float                       phi             = 0.0f;
+    private float                       x               = 3.25f*2.0f;
+    private float                       y               = 8.88f*2.0f;
+    private float                       z               = 3.24f*2.0f;
 
     static { GLProfile.initSingleton(); }
 
-    public OpenGLRenderer(int width, int height) {
-        super(width, height);
+    public OpenGLRenderer() {
 
+    }
+
+    public void initialize(String title, int width, int height) {
         this.width  = width;
         this.height = height;
-    }
 
-    public void create() {
-        this.setupOpenGL();
-    }
-
-    protected void setupOpenGL() {
         GLProfile      profile      = GLProfile.get(GLProfile.GL2);
         GLCapabilities capabilities = new GLCapabilities(profile);
 
         final GLWindow window = GLWindow.create(capabilities);
         window.addGLEventListener(this);
         window.setSize(this.width, this.height);
-        window.setTitle("OpenGLRenderer");
+        window.setTitle(title);
 
         window.addWindowListener(new WindowAdapter() {
             public void windowDestroyNotify(WindowEvent arg0) {
@@ -72,16 +66,26 @@ public class OpenGLRenderer extends AbstractRenderer implements GLEventListener,
         return this.glad;
     }
 
-    public void addRenderThreadCallbackListener(IAbstractRenderThreadCallbackListener listener) {
-        this.renderThreadListener = listener;
+    public void addAnimateCallbackListener(AnimateCallbackListener listener) {
+        this.animateListener = listener;
     }
 
-    public void close() {
+    public void dispose() {
 
     }
 
-    public AbstractSprite createSprite(String filename, int width, int height) {
-        return new OpenGLSprite(this, filename, width, height);
+    public Sprite createSprite(String filename, int width, int height) {
+        Sprite sprite = new OpenGLSprite();
+        sprite.initialize(this, filename, width, height);
+        return sprite;
+    }
+
+    public Material createMaterial(String filename) {
+        return null;
+    }
+
+    public Model createModel() {
+        return null;
     }
 
     public void beginRender() {
@@ -91,12 +95,6 @@ public class OpenGLRenderer extends AbstractRenderer implements GLEventListener,
         gl2.glClear(GL2.GL_COLOR_BUFFER_BIT | GL2.GL_DEPTH_BUFFER_BIT);
 
         gl2.glLoadIdentity();
-
-        /*theta += Math.PI/180*0.5f;
-        phi   += Math.PI/360*0.5f;
-
-        theta = 10.629146f;
-        phi = 5.314573f;*/
 
         float r = 10f;
         GLU glu = new GLU();
@@ -125,7 +123,7 @@ public class OpenGLRenderer extends AbstractRenderer implements GLEventListener,
         gl2.glCullFace(GL.GL_BACK);
         gl2.glEnable(GL.GL_DEPTH_TEST);
         gl2.glShadeModel(GL2.GL_SMOOTH);
-        this.renderThreadListener.initialize();
+        this.animateListener.initialize();
     }
 
     @Override
@@ -133,12 +131,15 @@ public class OpenGLRenderer extends AbstractRenderer implements GLEventListener,
 
     @Override
     public void display(GLAutoDrawable glad) {
-        this.renderThreadListener.renderThread();
+        this.animateListener.animate();
     }
 
     @Override
     public void reshape(GLAutoDrawable glad, int x, int y, int w, int h) {
         GL2 gl2 = glad.getGL().getGL2();
+
+        this.width  = w;
+        this.height = h;
 
         gl2.glViewport(x, y, w, h);
     }

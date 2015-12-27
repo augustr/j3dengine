@@ -1,6 +1,6 @@
 import gfx.*;
 
-public class LandscapeSection implements IRenderable {
+public class LandscapeSection implements Renderable {
     public LandscapeSection() {
 
     }

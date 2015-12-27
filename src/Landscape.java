@@ -1,6 +1,6 @@
 import gfx.*;
 
-public class Landscape implements IRenderable {
+public class Landscape implements Renderable {
     LandscapeSection[][] landscapeSections = null;
 
     public Landscape(String filename) {
