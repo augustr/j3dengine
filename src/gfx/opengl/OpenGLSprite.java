@@ -4,15 +4,18 @@ import com.jogamp.opengl.*;
 
 import gfx.*;
 
+/**
+ * Meant to represent a rotatable, scalable 2D sprite. Curently only renders a simple triangle.
+ */
 public class OpenGLSprite implements Sprite {
     protected OpenGLRenderer renderer = null;
 
-    public OpenGLSprite() {
-
+    public OpenGLSprite(Renderer renderer) {
+        this.renderer = (OpenGLRenderer) renderer;
     }
 
-    public void initialize(Renderer renderer, String filename, int width, int height) {
-        this.renderer = (OpenGLRenderer) renderer;
+    public void initialize(String filename, int width, int height) {
+
     }
 
     public void render(float x, float y) {

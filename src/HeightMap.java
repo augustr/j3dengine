@@ -1,5 +1,3 @@
-package gfx;
-
 import java.awt.image.BufferedImage;
 import javax.imageio.ImageIO;
 import java.io.IOException;
@@ -53,5 +51,9 @@ public class HeightMap {
 
     public int getHeight() {
         return this.height;
+    }
+
+    public float[][] getHeightMapArray() {
+        return this.heightMap;
     }
 }

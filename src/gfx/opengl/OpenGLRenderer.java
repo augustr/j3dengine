@@ -14,18 +14,23 @@ import com.jogamp.newt.event.KeyEvent;
 
 import gfx.*;
 
+/**
+ * OpenGL Renderer implementation
+ *
+ * @todo: The input functionality (Mouse, Keyboard) and "camera features" shouldn't be done here.
+ */
 public class OpenGLRenderer implements Renderer, GLEventListener, MouseListener, KeyListener {
-    private AnimateCallbackListener     animateListener = null;
-    private GLAutoDrawable              glad            = null;
-    private int                         width           = 800;
-    private int                         height          = 600;
-    private int                         lastMouseX      = 0;
-    private int                         lastMouseY      = 0;
-    private float                       theta           = 0.0f;
-    private float                       phi             = 0.0f;
-    private float                       x               = 3.25f*2.0f;
-    private float                       y               = 8.88f*2.0f;
-    private float                       z               = 3.24f*2.0f;
+    private AnimateCallbackListener animateListener = null;
+    private GLAutoDrawable          glad            = null;
+    private int                     width           = 800;
+    private int                     height          = 600;
+    private int                     lastMouseX      = 0;
+    private int                     lastMouseY      = 0;
+    private float                   theta           = 0.0f;
+    private float                   phi             = 0.0f;
+    private float                   x               = 3.25f*2.0f;
+    private float                   y               = 8.88f*2.0f;
+    private float                   z               = 3.24f*2.0f;
 
     static { GLProfile.initSingleton(); }
 
@@ -75,17 +80,19 @@ public class OpenGLRenderer implements Renderer, GLEventListener, MouseListener,
     }
 
     public Sprite createSprite(String filename, int width, int height) {
-        Sprite sprite = new OpenGLSprite();
-        sprite.initialize(this, filename, width, height);
+        Sprite sprite = new OpenGLSprite(this);
+        sprite.initialize(filename, width, height);
         return sprite;
     }
 
-    public Material createMaterial(String filename) {
-        return null;
+    public Material createMaterial(String filename) throws java.io.IOException {
+        Material material = new OpenGLMaterial(this);
+        material.initialize(filename);
+        return material;
     }
 
-    public Model createModel() {
-        return null;
+    public Surface createSurface() {
+        return new OpenGLSurface(this);
     }
 
     public void beginRender() {
@@ -194,10 +201,10 @@ public class OpenGLRenderer implements Renderer, GLEventListener, MouseListener,
     {
         switch(arg0.getKeyCode())
         {
-            case KeyEvent.VK_LEFT:  x=x-0.1f     ; break;
-            case KeyEvent.VK_RIGHT: x=x+0.1f     ; break;
-            case KeyEvent.VK_UP:    z=z-0.1f     ; break;
-            case KeyEvent.VK_DOWN:  z=z+0.1f     ; break;
+            case KeyEvent.VK_LEFT:  x=x-0.1f; break;
+            case KeyEvent.VK_RIGHT: x=x+0.1f; break;
+            case KeyEvent.VK_UP:    z=z-0.1f; break;
+            case KeyEvent.VK_DOWN:  z=z+0.1f; break;
         }
     }
 

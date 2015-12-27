@@ -9,6 +9,6 @@ public interface Renderer {
     void        beginRender();
     void        endRender();
     Sprite      createSprite(String filename, int width, int height);
-    Material    createMaterial(String filename);
-    Model       createModel();
+    Material    createMaterial(String filename) throws java.io.IOException;
+    Surface     createSurface();
 }
