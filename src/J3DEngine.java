@@ -22,7 +22,7 @@ public class J3DEngine implements AnimateCallbackListener {
     }
 
     public void initialize() {
-        this.landscape = new Landscape(this.renderer, "res/test6.bmp");
+        this.landscape = new Landscape(this.renderer, "res/test5.bmp");
     }
 
     public void animate() {

@@ -30,7 +30,7 @@ public class OpenGLRenderer implements Renderer, GLEventListener, MouseListener,
     private float                   phi             = 0.0f;
     private float                   x               = 3.25f*2.0f;
     private float                   y               = 8.88f*2.0f;
-    private float                   z               = 3.24f*2.0f;
+    private float                   z               = 3.24f*20.0f;
 
     static { GLProfile.initSingleton(); }
 
