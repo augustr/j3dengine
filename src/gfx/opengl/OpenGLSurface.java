@@ -51,7 +51,7 @@ public class OpenGLSurface implements Surface {
         float scale    = 5.0f;
         float hScale   = 0.2f*scale;
         float vScale   = 10.0f*scale;
-        float texScale = 0.5f*hScale;
+        float texScale = 0.05f*hScale;
 
         // Create vertex buffer with space for normals, colors and texture coordinates
         FloatBuffer vertexBuffer = this.createVertexBuffer(width, height, heightMap, scale, hScale, vScale, texScale);
@@ -62,7 +62,7 @@ public class OpenGLSurface implements Surface {
         // Create and load vertex buffer data into GL buffer
         gl2.glGenBuffers(1, this.vertexHandle, 0);
         gl2.glBindBuffer(GL.GL_ARRAY_BUFFER, this.vertexHandle[0]);
-        gl2.glBufferData(GL.GL_ARRAY_BUFFER, this.vertexCount * 11 * Buffers.SIZEOF_FLOAT, vertexBuffer, GL.GL_STATIC_DRAW);
+        gl2.glBufferData(GL.GL_ARRAY_BUFFER, this.vertexCount * 12 * Buffers.SIZEOF_FLOAT, vertexBuffer, GL.GL_STATIC_DRAW);
 
         // Create and load index buffer data into GL buffer
         gl2.glGenBuffers(1, this.indexHandle, 0);
@@ -75,7 +75,7 @@ public class OpenGLSurface implements Surface {
     }
 
     private FloatBuffer createVertexBuffer(int width, int height, float[][] heightMap, float scale, float hScale, float vScale, float texScale) {
-        FloatBuffer vertexBuffer = Buffers.newDirectFloatBuffer(width*height*11);
+        FloatBuffer vertexBuffer = Buffers.newDirectFloatBuffer(width*height*12);
 
         // Create vertex, normal, color and texture buffer
         for(int x = 0; x < width; x++) {
@@ -88,15 +88,16 @@ public class OpenGLSurface implements Surface {
                 vertexBuffer.put(z/256.0f*vScale);
 
                 // Normal coordinates
-                // Only reserve space for normals. Calculate them later when index buffer is created
+                // Only reserve space for normals and color. Calculate them later when index buffer is created
                 vertexBuffer.put(0.0f);
                 vertexBuffer.put(0.0f);
                 vertexBuffer.put(0.0f);
 
                 // Color components
-                vertexBuffer.put(z/256.0f*2.0f);
-                vertexBuffer.put(z/256.0f*2.0f);
-                vertexBuffer.put(z/256.0f*2.0f);
+                vertexBuffer.put(0.0f);
+                vertexBuffer.put(0.0f);
+                vertexBuffer.put(0.0f);
+                vertexBuffer.put(1.0f);
 
                 // Texture coordinates
                 vertexBuffer.put(x*texScale);
@@ -129,7 +130,7 @@ public class OpenGLSurface implements Surface {
                 indexBuffer.put(t13);
 
                 // Calculate triangle normal and fill in vertex buffer
-                this.addNormal(vertexBuffer, width, height, t11, t12, t13, false);
+                this.addNormalAndShading(vertexBuffer, width, height, t11, t12, t13, false);
 
                 // Second triangle
                 int t21 = (x + 1) * height + y;
@@ -141,7 +142,7 @@ public class OpenGLSurface implements Surface {
                 indexBuffer.put(t23);
 
                 // Calculate triangle normal and fill in vertex buffer
-                this.addNormal(vertexBuffer, width, height, t21, t22, t23, true);
+                this.addNormalAndShading(vertexBuffer, width, height, t21, t22, t23, true);
 
                 this.indexCount += 6;
             }
@@ -152,40 +153,50 @@ public class OpenGLSurface implements Surface {
         return indexBuffer;
     }
 
-    private void addNormal(FloatBuffer vertexBuffer, int width, int height, int t1, int t2, int t3, boolean invert) {
-        Vector v1 = new Vector(vertexBuffer.get(t1*11), vertexBuffer.get(t1*11+1), vertexBuffer.get(t1*11+2));
-        Vector v2 = new Vector(vertexBuffer.get(t2*11), vertexBuffer.get(t2*11+1), vertexBuffer.get(t2*11+2));
-        Vector v3 = new Vector(vertexBuffer.get(t3*11), vertexBuffer.get(t3*11+1), vertexBuffer.get(t3*11+2));
+    private void addNormalAndShading(FloatBuffer vertexBuffer, int width, int height, int t1, int t2, int t3, boolean invert) {
+        Vector v1 = new Vector(vertexBuffer.get(t1*12), vertexBuffer.get(t1*12+1), vertexBuffer.get(t1*12+2));
+        Vector v2 = new Vector(vertexBuffer.get(t2*12), vertexBuffer.get(t2*12+1), vertexBuffer.get(t2*12+2));
+        Vector v3 = new Vector(vertexBuffer.get(t3*12), vertexBuffer.get(t3*12+1), vertexBuffer.get(t3*12+2));
 
         Vector normal = Vector.normal(v1, v2, v3);
 
         if (invert) {
-            normal.scale(-1.0f);
+            //normal.scale(-1.0f);
         }
 
-        Vector sun = new Vector(-0.9f, -0.9f, 0.2f);
+        Vector sun = new Vector(-0.4f, -0.4f, 0.4f);
+        Vector up  = new Vector(0.0f, 0.0f, 1.0f);
+
         float shading = Vector.dot(normal, sun);
+        float slope   = 1.0f - (float) Math.pow(Vector.dot(normal, up), 10);
+        slope = 1.0f;
 
-        vertexBuffer.put(t1*11+3, normal.getX());
-        vertexBuffer.put(t1*11+4, normal.getY());
-        vertexBuffer.put(t1*11+5, normal.getZ());
+        vertexBuffer.put(t1*12+3, normal.getX());
+        vertexBuffer.put(t1*12+4, normal.getY());
+        vertexBuffer.put(t1*12+5, normal.getZ());
 
-        vertexBuffer.put(t2*11+3, normal.getX());
-        vertexBuffer.put(t2*11+4, normal.getY());
-        vertexBuffer.put(t2*11+5, normal.getZ());
+        vertexBuffer.put(t2*12+3, normal.getX());
+        vertexBuffer.put(t2*12+4, normal.getY());
+        vertexBuffer.put(t2*12+5, normal.getZ());
 
-        vertexBuffer.put(t3*11+3, normal.getX());
-        vertexBuffer.put(t3*11+4, normal.getY());
-        vertexBuffer.put(t3*11+5, normal.getZ());
+        vertexBuffer.put(t3*12+3, normal.getX());
+        vertexBuffer.put(t3*12+4, normal.getY());
+        vertexBuffer.put(t3*12+5, normal.getZ());
 
-        vertexBuffer.put(t1*11+6, shading);
-        vertexBuffer.put(t1*11+7, shading);
+        vertexBuffer.put(t1*12+6, shading);
+        vertexBuffer.put(t1*12+7, shading);
+        vertexBuffer.put(t1*12+8, shading);
+        vertexBuffer.put(t1*12+9, slope);
 
-        vertexBuffer.put(t2*11+6, shading);
-        vertexBuffer.put(t2*11+7, shading);
+        vertexBuffer.put(t2*12+6, shading);
+        vertexBuffer.put(t2*12+7, shading);
+        vertexBuffer.put(t2*12+8, shading);
+        vertexBuffer.put(t2*12+9, slope);
 
-        vertexBuffer.put(t3*11+6, shading);
-        vertexBuffer.put(t3*11+7, shading);
+        vertexBuffer.put(t3*12+6, shading);
+        vertexBuffer.put(t3*12+7, shading);
+        vertexBuffer.put(t3*12+8, shading);
+        vertexBuffer.put(t3*12+9, slope);
     }
 
     public void render() {
@@ -197,12 +208,11 @@ public class OpenGLSurface implements Surface {
         gl2.glEnableClientState(GL2.GL_TEXTURE_COORD_ARRAY);
 
         gl2.glBindBuffer(GL.GL_ARRAY_BUFFER, this.vertexHandle[0]);
-        gl2.glVertexPointer(3, GL.GL_FLOAT, 11*Buffers.SIZEOF_FLOAT, 0);
-        gl2.glNormalPointer(GL.GL_FLOAT, 11*Buffers.SIZEOF_FLOAT, 3*Buffers.SIZEOF_FLOAT);
-        gl2.glColorPointer(3, GL.GL_FLOAT, 11*Buffers.SIZEOF_FLOAT, 6*Buffers.SIZEOF_FLOAT);
-        gl2.glTexCoordPointer(2, GL.GL_FLOAT, 11*Buffers.SIZEOF_FLOAT, 9*Buffers.SIZEOF_FLOAT);
+        gl2.glVertexPointer(3, GL.GL_FLOAT, 12*Buffers.SIZEOF_FLOAT, 0);
+        gl2.glNormalPointer(GL.GL_FLOAT, 12*Buffers.SIZEOF_FLOAT, 3*Buffers.SIZEOF_FLOAT);
+        gl2.glColorPointer(3, GL.GL_FLOAT, 12*Buffers.SIZEOF_FLOAT, 6*Buffers.SIZEOF_FLOAT);
+        gl2.glTexCoordPointer(2, GL.GL_FLOAT, 12*Buffers.SIZEOF_FLOAT, 10*Buffers.SIZEOF_FLOAT);
 
-        // Pass 1. Render the default material
         this.defaultMaterial.enable();
 
         gl2.glDrawElements(GL.GL_TRIANGLES, this.indexCount, GL.GL_UNSIGNED_INT, 0);
