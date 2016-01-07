@@ -13,17 +13,17 @@ import gfx.*;
 import gfx.math.*;
 
 public class OpenGLSurface implements Surface {
-    private int[]    vertexHandle    = new int[1];
-    private int      vertexCount     = 0;
-    private int[]    indexHandle     = new int[1];
-    private int      indexCount      = 0;
-    private Material defaultMaterial = null;
-    private Material slopeMaterial   = null;
-    private Material lowMaterial     = null;
-    private float    slope           = 0.5f;
-    private float    elavation       = 0.1f;
-
-    private OpenGLRenderer renderer     = null;
+    private int[]          vertexHandle    = new int[1];
+    private int            vertexCount     = 0;
+    private int[]          indexHandle     = new int[1];
+    private int            indexCount      = 0;
+    private Material       defaultMaterial = null;
+    private Material       slopeMaterial   = null;
+    private Material       lowMaterial     = null;
+    private float          slope           = 0.5f;
+    private float          elavation       = 0.1f;
+    private OpenGLRenderer renderer        = null;
+    private OpenGLShader   shader          = null;
 
     public OpenGLSurface(OpenGLRenderer renderer) {
         this.renderer = renderer;
@@ -72,6 +72,10 @@ public class OpenGLSurface implements Surface {
         // Data is now copied to GPU memory. Clear local data
         vertexBuffer  = null;
         indexBuffer   = null;
+
+        // Create and load shader
+        this.shader = new OpenGLShader(this.renderer);
+        this.shader.loadVertexShaderFromFile("shaders/surface.glsl");
     }
 
     private FloatBuffer createVertexBuffer(int width, int height, float[][] heightMap, float scale, float hScale, float vScale, float texScale) {
@@ -214,6 +218,8 @@ public class OpenGLSurface implements Surface {
         gl2.glTexCoordPointer(2, GL.GL_FLOAT, 12*Buffers.SIZEOF_FLOAT, 10*Buffers.SIZEOF_FLOAT);
 
         this.defaultMaterial.enable();
+
+        this.shader.enable();
 
         gl2.glDrawElements(GL.GL_TRIANGLES, this.indexCount, GL.GL_UNSIGNED_INT, 0);
 
