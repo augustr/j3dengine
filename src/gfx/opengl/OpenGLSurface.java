@@ -73,9 +73,9 @@ public class OpenGLSurface implements Surface {
         vertexBuffer  = null;
         indexBuffer   = null;
 
-        // Create and load shader
+        // Create and load shaders
         this.shader = new OpenGLShader(this.renderer);
-        this.shader.loadVertexShaderFromFile("shaders/surface.glsl");
+        this.shader.loadVertexShaderFromFile("shaders/surface");
     }
 
     private FloatBuffer createVertexBuffer(int width, int height, float[][] heightMap, float scale, float hScale, float vScale, float texScale) {
@@ -206,28 +206,23 @@ public class OpenGLSurface implements Surface {
     public void render() {
         GL2 gl2 = renderer.getGLAutoDrawable().getGL().getGL2();
 
-        gl2.glEnableClientState(GL2.GL_VERTEX_ARRAY);
-        gl2.glEnableClientState(GL2.GL_NORMAL_ARRAY);
-        gl2.glEnableClientState(GL2.GL_COLOR_ARRAY);
-        gl2.glEnableClientState(GL2.GL_TEXTURE_COORD_ARRAY);
-
-        gl2.glBindBuffer(GL.GL_ARRAY_BUFFER, this.vertexHandle[0]);
-        gl2.glVertexPointer(3, GL.GL_FLOAT, 12*Buffers.SIZEOF_FLOAT, 0);
-        gl2.glNormalPointer(GL.GL_FLOAT, 12*Buffers.SIZEOF_FLOAT, 3*Buffers.SIZEOF_FLOAT);
-        gl2.glColorPointer(3, GL.GL_FLOAT, 12*Buffers.SIZEOF_FLOAT, 6*Buffers.SIZEOF_FLOAT);
-        gl2.glTexCoordPointer(2, GL.GL_FLOAT, 12*Buffers.SIZEOF_FLOAT, 10*Buffers.SIZEOF_FLOAT);
-
         this.defaultMaterial.enable();
 
         this.shader.enable();
 
+        gl2.glBindBuffer(GL.GL_ARRAY_BUFFER, this.vertexHandle[0]);
+
+        gl2.glVertexAttribPointer(0, 3, GL.GL_FLOAT, false, 12*Buffers.SIZEOF_FLOAT, 0);
+        gl2.glVertexAttribPointer(1, 3, GL.GL_FLOAT, false, 12*Buffers.SIZEOF_FLOAT, 3*Buffers.SIZEOF_FLOAT);
+        gl2.glVertexAttribPointer(2, 4, GL.GL_FLOAT, false, 12*Buffers.SIZEOF_FLOAT, 6*Buffers.SIZEOF_FLOAT);
+        gl2.glVertexAttribPointer(3, 2, GL.GL_FLOAT, false, 12*Buffers.SIZEOF_FLOAT, 10*Buffers.SIZEOF_FLOAT);
+        gl2.glEnableVertexAttribArray(0);
+        gl2.glEnableVertexAttribArray(1);
+        gl2.glEnableVertexAttribArray(2);
+        gl2.glEnableVertexAttribArray(3);
+
         gl2.glDrawElements(GL.GL_TRIANGLES, this.indexCount, GL.GL_UNSIGNED_INT, 0);
 
         this.defaultMaterial.disable();
-
-        gl2.glDisableClientState(GL2.GL_VERTEX_ARRAY);
-        gl2.glDisableClientState(GL2.GL_NORMAL_ARRAY);
-        gl2.glDisableClientState(GL2.GL_COLOR_ARRAY);
-        gl2.glDisableClientState(GL2.GL_TEXTURE_COORD_ARRAY);
     }
 }

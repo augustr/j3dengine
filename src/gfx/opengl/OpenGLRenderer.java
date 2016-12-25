@@ -26,8 +26,8 @@ public class OpenGLRenderer implements Renderer, GLEventListener, MouseListener,
     private int                     height          = 600;
     private int                     lastMouseX      = 0;
     private int                     lastMouseY      = 0;
-    private float                   theta           = 0.0f;
-    private float                   phi             = 0.0f;
+    private float                   theta           = (float) Math.PI/4.0f;
+    private float                   phi             = (float) Math.PI/4.0f*3.0f;
     private float                   x               = 3.25f*2.0f;
     private float                   y               = 8.88f*2.0f;
     private float                   z               = 3.24f*20.0f;
