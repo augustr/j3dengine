@@ -1,5 +1,7 @@
 package gfx.opengl;
 
+import gfx.*;
+
 import com.jogamp.opengl.*;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
@@ -112,6 +114,10 @@ public class OpenGLShader {
     public void enable() {
         GL2 gl2 = this.renderer.getGLAutoDrawable().getGL().getGL2();
         gl2.glUseProgram(this.shaderId);
+    }
+
+    public int getId() {
+        return this.shaderId;
     }
 
     private String[] loadShaderSource(String filename) {

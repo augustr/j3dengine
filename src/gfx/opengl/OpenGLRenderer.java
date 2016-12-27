@@ -201,10 +201,10 @@ public class OpenGLRenderer implements Renderer, GLEventListener, MouseListener,
     {
         switch(arg0.getKeyCode())
         {
-            case KeyEvent.VK_LEFT:  x=x-0.1f; break;
-            case KeyEvent.VK_RIGHT: x=x+0.1f; break;
-            case KeyEvent.VK_UP:    z=z-0.1f; break;
-            case KeyEvent.VK_DOWN:  z=z+0.1f; break;
+            case KeyEvent.VK_LEFT:  x=x-1.1f; break;
+            case KeyEvent.VK_RIGHT: x=x+1.1f; break;
+            case KeyEvent.VK_UP:    z=z-1.1f; break;
+            case KeyEvent.VK_DOWN:  z=z+1.1f; break;
         }
     }
 

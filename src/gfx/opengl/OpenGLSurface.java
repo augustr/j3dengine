@@ -76,6 +76,13 @@ public class OpenGLSurface implements Surface {
         // Create and load shaders
         this.shader = new OpenGLShader(this.renderer);
         this.shader.loadVertexShaderFromFile("shaders/surface");
+
+        // Enable the shader
+        this.shader.enable();
+
+        // Bind shader to materials
+        ((OpenGLMaterial) this.defaultMaterial).bindShader(this.shader);
+        ((OpenGLMaterial) this.slopeMaterial).bindShader(this.shader);
     }
 
     private FloatBuffer createVertexBuffer(int width, int height, float[][] heightMap, float scale, float hScale, float vScale, float texScale) {
@@ -168,12 +175,12 @@ public class OpenGLSurface implements Surface {
             //normal.scale(-1.0f);
         }
 
-        Vector sun = new Vector(-0.4f, -0.4f, 0.4f);
+        Vector sun = new Vector(0.4f, -0.4f, 0.4f);
         Vector up  = new Vector(0.0f, 0.0f, 1.0f);
+        sun.normalize();
 
         float shading = Vector.dot(normal, sun);
         float slope   = 1.0f - (float) Math.pow(Vector.dot(normal, up), 10);
-        slope = 1.0f;
 
         vertexBuffer.put(t1*12+3, normal.getX());
         vertexBuffer.put(t1*12+4, normal.getY());
@@ -207,8 +214,7 @@ public class OpenGLSurface implements Surface {
         GL2 gl2 = renderer.getGLAutoDrawable().getGL().getGL2();
 
         this.defaultMaterial.enable();
-
-        this.shader.enable();
+        this.slopeMaterial.enable();
 
         gl2.glBindBuffer(GL.GL_ARRAY_BUFFER, this.vertexHandle[0]);
 
@@ -223,6 +229,7 @@ public class OpenGLSurface implements Surface {
 
         gl2.glDrawElements(GL.GL_TRIANGLES, this.indexCount, GL.GL_UNSIGNED_INT, 0);
 
+        this.slopeMaterial.disable();
         this.defaultMaterial.disable();
     }
 }
