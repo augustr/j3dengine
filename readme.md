@@ -1,5 +1,7 @@
 # J3DEngine
 
+![Screenshot of J3DEngine](https://github.com/augustr/j3dengine/raw/master/screenshot.jpg)
+
 ## Overview
 
 This projects aims to port/rewrite an old C++ Direct3D9 Game engine of mine, using Java and OpenGL with GLSL shaders. I choose java becauase I may want to port it to android some day, and OpenGL for learning purposes.
