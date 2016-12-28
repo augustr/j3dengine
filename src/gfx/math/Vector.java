@@ -15,6 +15,11 @@ public class Vector {
         this.z = z;
     }
 
+    @Override
+    public String toString() {
+        return new String("(" + getX() + "," + getY() + "," + getZ() + ")");
+    }
+
     public float getX() {
         return this.x;
     }
@@ -55,6 +60,14 @@ public class Vector {
         return new Vector(v1.getX() + v2.getX(),
                           v1.getY() + v2.getY(),
                           v1.getZ() + v2.getZ());
+    }
+
+    public static Vector add(Vector v1, Vector v2, Vector v3) {
+        return Vector.add(Vector.add(v1, v2), v3);
+    }
+
+    public static Vector add(Vector v1, Vector v2, Vector v3, Vector v4) {
+        return Vector.add(Vector.add(v1, v2), Vector.add(v3, v4));
     }
 
     /**

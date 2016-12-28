@@ -29,6 +29,7 @@ public class HeightMap {
         for (int x = 0; x < this.width; x++) {
             for (int y = 0; y < this.height; y++) {
                 int color = image.getRGB(x, y);
+                color = color << 16;
                 // Store red channel as Z value
                 this.setZ(x, y, (float)((color & 0xff0000) >> 16));
             }

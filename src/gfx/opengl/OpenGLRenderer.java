@@ -30,7 +30,7 @@ public class OpenGLRenderer implements Renderer, GLEventListener, MouseListener,
     private float                   phi             = (float) Math.PI/4.0f*3.0f;
     private float                   x               = 3.25f*2.0f;
     private float                   y               = 8.88f*2.0f;
-    private float                   z               = 3.24f*20.0f;
+    private float                   z               = 3.24f*2.0f;
 
     static { GLProfile.initSingleton(); }
 
@@ -201,10 +201,12 @@ public class OpenGLRenderer implements Renderer, GLEventListener, MouseListener,
     {
         switch(arg0.getKeyCode())
         {
-            case KeyEvent.VK_LEFT:  x=x-1.1f; break;
-            case KeyEvent.VK_RIGHT: x=x+1.1f; break;
-            case KeyEvent.VK_UP:    z=z-1.1f; break;
-            case KeyEvent.VK_DOWN:  z=z+1.1f; break;
+            case KeyEvent.VK_LEFT:  x=x-0.1f; break;
+            case KeyEvent.VK_RIGHT: x=x+0.1f; break;
+            case KeyEvent.VK_UP:    z=z-0.1f; break;
+            case KeyEvent.VK_DOWN:  z=z+0.1f; break;
+            case KeyEvent.VK_PAGE_UP: y=y+0.1f; break;
+            case KeyEvent.VK_PAGE_DOWN: y=y-0.1f; break;
         }
     }
 

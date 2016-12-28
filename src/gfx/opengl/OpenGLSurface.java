@@ -2,12 +2,10 @@ package gfx.opengl;
 
 import com.jogamp.common.nio.Buffers;
 import com.jogamp.opengl.*;
-import com.jogamp.opengl.util.texture.*;
 import java.nio.FloatBuffer;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.nio.IntBuffer;
-import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 
 import gfx.*;
 import gfx.math.*;
@@ -48,10 +46,10 @@ public class OpenGLSurface implements Surface {
 
         this.renderer = renderer;
 
-        float scale    = 5.0f;
+        float scale    = 0.5f;
         float hScale   = 0.2f*scale;
         float vScale   = 10.0f*scale;
-        float texScale = 0.05f*hScale;
+        float texScale = 0.5f*hScale;
 
         // Create vertex buffer with space for normals, colors and texture coordinates
         FloatBuffer vertexBuffer = this.createVertexBuffer(width, height, heightMap, scale, hScale, vScale, texScale);
@@ -126,88 +124,123 @@ public class OpenGLSurface implements Surface {
         IntBuffer indexBuffer = Buffers.newDirectIntBuffer(6*(width-1)*(height-1));
 
         // Create index buffer
-        long xIndexes = width-1;
+        long xIndexes = width;
         long yIndexes = height-1;
 
-        for (int x = 0; x < xIndexes; x++) {
-            for (int y = 0; y < yIndexes; y++) {
-                // First triangle
-                int t11 = x * height + y;
-                int t12 = (x + 1) * height + y;
-                int t13 = x * height + y + 1;
+        for (int y = 0; y < yIndexes; y++) {
+            for (int x = 0; x < xIndexes; x++) {
+                int v1 = x * height + y;
+                int v2 = x * height + y + 1;
 
-                indexBuffer.put(t11);
-                indexBuffer.put(t12);
-                indexBuffer.put(t13);
+                // Add degenerate triangle for opengl triangle strip
+                if (x == 0 && y > 0 && y < yIndexes-1) {
+                    indexBuffer.put(v1);
+                    this.indexCount += 1;
+                }
 
-                // Calculate triangle normal and fill in vertex buffer
-                this.addNormalAndShading(vertexBuffer, width, height, t11, t12, t13, false);
+                indexBuffer.put(v1);
+                indexBuffer.put(v2);
+                this.indexCount += 2;
 
-                // Second triangle
-                int t21 = (x + 1) * height + y;
-                int t22 = (x + 1) * height + y + 1;
-                int t23 = x * height + y + 1;
-
-                indexBuffer.put(t21);
-                indexBuffer.put(t22);
-                indexBuffer.put(t23);
-
-                // Calculate triangle normal and fill in vertex buffer
-                this.addNormalAndShading(vertexBuffer, width, height, t21, t22, t23, true);
-
-                this.indexCount += 6;
+                // Add degenerate triangle for opengl triangle strip
+                if (x == xIndexes-1 && y > 0 && y < yIndexes-1) {
+                    indexBuffer.put(v2);
+                    this.indexCount += 1;
+                }
             }
         }
+
+        calculateNormalsAndShading(xIndexes, yIndexes, width, height, heightMap, vertexBuffer);
+
+        // Interpolate the normals to get a smooth rendering of the terrain
+        interpolateNormals(xIndexes, yIndexes, width, height, vertexBuffer);
 
         indexBuffer.flip();
 
         return indexBuffer;
     }
 
-    private void addNormalAndShading(FloatBuffer vertexBuffer, int width, int height, int t1, int t2, int t3, boolean invert) {
-        Vector v1 = new Vector(vertexBuffer.get(t1*12), vertexBuffer.get(t1*12+1), vertexBuffer.get(t1*12+2));
-        Vector v2 = new Vector(vertexBuffer.get(t2*12), vertexBuffer.get(t2*12+1), vertexBuffer.get(t2*12+2));
-        Vector v3 = new Vector(vertexBuffer.get(t3*12), vertexBuffer.get(t3*12+1), vertexBuffer.get(t3*12+2));
+    private void calculateNormalsAndShading(long xIndexes, long yIndexes, int width, int height, float[][] heightMap, FloatBuffer vertexBuffer) {
+        // TODO: Handle edge cases
+        for (int x = 1; x < xIndexes-1; x++) {
+            for (int y = 1; y < yIndexes-1; y++) {
+                // Get indexes for left, right, top and bottom vertice with respect to this one
+                int vertex  = x*height + y;
+                int vertexL = (x-1)*height + y;
+                int vertexR = (x+1)*height + y;
+                int vertexT = x*height + (y-1);
+                int vertexB = x*height + (y+1);
 
-        Vector normal = Vector.normal(v1, v2, v3);
+                Vector v  = new Vector(vertexBuffer.get(vertex*12),  vertexBuffer.get(vertex*12+1),  vertexBuffer.get(vertex*12+2));
+                Vector vL = new Vector(vertexBuffer.get(vertexL*12), vertexBuffer.get(vertexL*12+1), vertexBuffer.get(vertexL*12+2));
+                Vector vR = new Vector(vertexBuffer.get(vertexR*12), vertexBuffer.get(vertexR*12+1), vertexBuffer.get(vertexR*12+2));
+                Vector vT = new Vector(vertexBuffer.get(vertexT*12), vertexBuffer.get(vertexT*12+1), vertexBuffer.get(vertexT*12+2));
+                Vector vB = new Vector(vertexBuffer.get(vertexB*12), vertexBuffer.get(vertexB*12+1), vertexBuffer.get(vertexB*12+2));
 
-        if (invert) {
-            //normal.scale(-1.0f);
+                float dfdxL = (v.getZ() - vL.getZ())/(v.getX() - vL.getX());
+                float dfdxR = (v.getZ() - vR.getZ())/(v.getX() - vR.getX());
+                float dfdyT = (v.getZ() - vT.getZ())/(v.getY() - vT.getY());
+                float dfdyB = (v.getZ() - vB.getZ())/(v.getY() - vB.getY());
+
+                float dfdx = (dfdxL + dfdxR)/2.0f;
+                float dfdy = (dfdyT + dfdyB)/2.0f;
+
+                Vector normal = new Vector(-dfdx, -dfdy, 1.0f);
+                normal.normalize();
+                vertexBuffer.put(vertex*12+3, normal.getX());
+                vertexBuffer.put(vertex*12+4, normal.getY());
+                vertexBuffer.put(vertex*12+5, normal.getZ());
+
+                // Calculate light shading and slope
+                Vector sun = new Vector(0.4f, -0.4f, 0.4f);
+                Vector up  = new Vector(0.0f, 0.0f, 1.0f);
+                sun.normalize();
+
+                float shading = Vector.dot(normal, sun);
+                float slope   = 1.0f - (float) Math.pow(Vector.dot(normal, up), 10);
+
+                vertexBuffer.put(vertex*12+6, shading);
+                vertexBuffer.put(vertex*12+7, shading);
+                vertexBuffer.put(vertex*12+8, shading);
+                vertexBuffer.put(vertex*12+9, slope);
+            }
+        }
+    }
+
+    private void interpolateNormals(long xIndexes, long yIndexes, int width, int height, FloatBuffer vertexBuffer) {
+        // Create temporary hashmap for storing intermediate results
+        HashMap<Integer, Vector> newNormals = new HashMap<Integer, Vector>();
+
+        // Interpolate normals to get smooth terrain
+        for (int x = 1; x < xIndexes-1; x++) {
+            for (int y = 1; y < yIndexes-1; y++) {
+                // Get indexes for left, right, top and bottom vertice with respect to this one
+                int vertice  = x*height + y;
+                int verticeL = (x-1)*height + y;
+                int verticeR = (x+1)*height + y;
+                int verticeT = x*height + (y-1);
+                int verticeB = x*height + (y+1);
+
+                // For left, right, top and bottom vertices outside the range, assign the zero vector which then won't
+                // add anything to the total sum.
+                Vector normalL = x > 0      ? new Vector(vertexBuffer.get(verticeL*12+3), vertexBuffer.get(verticeL*12+4), vertexBuffer.get(verticeL*12+5)) : new Vector();
+                Vector normalR = x < width  ? new Vector(vertexBuffer.get(verticeR*12+3), vertexBuffer.get(verticeR*12+4), vertexBuffer.get(verticeR*12+5)) : new Vector();
+                Vector normalT = y > 0      ? new Vector(vertexBuffer.get(verticeT*12+3), vertexBuffer.get(verticeT*12+4), vertexBuffer.get(verticeT*12+5)) : new Vector();
+                Vector normalB = y < height ? new Vector(vertexBuffer.get(verticeB*12+3), vertexBuffer.get(verticeB*12+4), vertexBuffer.get(verticeB*12+5)) : new Vector();
+
+                // Calculate the interpolated normal and assign
+                Vector newNormal = Vector.add(normalL, normalR, normalT, normalB);
+                newNormal.normalize();
+                newNormals.put(vertice, newNormal);
+            }
         }
 
-        Vector sun = new Vector(0.4f, -0.4f, 0.4f);
-        Vector up  = new Vector(0.0f, 0.0f, 1.0f);
-        sun.normalize();
-
-        float shading = Vector.dot(normal, sun);
-        float slope   = 1.0f - (float) Math.pow(Vector.dot(normal, up), 10);
-
-        vertexBuffer.put(t1*12+3, normal.getX());
-        vertexBuffer.put(t1*12+4, normal.getY());
-        vertexBuffer.put(t1*12+5, normal.getZ());
-
-        vertexBuffer.put(t2*12+3, normal.getX());
-        vertexBuffer.put(t2*12+4, normal.getY());
-        vertexBuffer.put(t2*12+5, normal.getZ());
-
-        vertexBuffer.put(t3*12+3, normal.getX());
-        vertexBuffer.put(t3*12+4, normal.getY());
-        vertexBuffer.put(t3*12+5, normal.getZ());
-
-        vertexBuffer.put(t1*12+6, shading);
-        vertexBuffer.put(t1*12+7, shading);
-        vertexBuffer.put(t1*12+8, shading);
-        vertexBuffer.put(t1*12+9, slope);
-
-        vertexBuffer.put(t2*12+6, shading);
-        vertexBuffer.put(t2*12+7, shading);
-        vertexBuffer.put(t2*12+8, shading);
-        vertexBuffer.put(t2*12+9, slope);
-
-        vertexBuffer.put(t3*12+6, shading);
-        vertexBuffer.put(t3*12+7, shading);
-        vertexBuffer.put(t3*12+8, shading);
-        vertexBuffer.put(t3*12+9, slope);
+        // Overwrite all normals
+        for (Map.Entry<Integer, Vector> entry : newNormals.entrySet()) {
+            vertexBuffer.put(entry.getKey()*12+3, entry.getValue().getX());
+            vertexBuffer.put(entry.getKey()*12+4, entry.getValue().getY());
+            vertexBuffer.put(entry.getKey()*12+5, entry.getValue().getZ());
+        }
     }
 
     public void render() {
@@ -215,8 +248,6 @@ public class OpenGLSurface implements Surface {
 
         this.defaultMaterial.enable();
         this.slopeMaterial.enable();
-
-        gl2.glBindBuffer(GL.GL_ARRAY_BUFFER, this.vertexHandle[0]);
 
         gl2.glVertexAttribPointer(0, 3, GL.GL_FLOAT, false, 12*Buffers.SIZEOF_FLOAT, 0);
         gl2.glVertexAttribPointer(1, 3, GL.GL_FLOAT, false, 12*Buffers.SIZEOF_FLOAT, 3*Buffers.SIZEOF_FLOAT);
@@ -227,7 +258,7 @@ public class OpenGLSurface implements Surface {
         gl2.glEnableVertexAttribArray(2);
         gl2.glEnableVertexAttribArray(3);
 
-        gl2.glDrawElements(GL.GL_TRIANGLES, this.indexCount, GL.GL_UNSIGNED_INT, 0);
+        gl2.glDrawElements(GL.GL_TRIANGLE_STRIP, this.indexCount, GL.GL_UNSIGNED_INT, 0);
 
         this.slopeMaterial.disable();
         this.defaultMaterial.disable();
