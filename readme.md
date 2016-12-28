@@ -14,6 +14,11 @@ Just build an run. Should load a height map with multilayer textures, lighting a
 
 Feel free to give feedback or merge requests!
 
+## Credits
+
+Stone texture (Creative Commons Attribution 4.0 International): http://wdc3d.com/blog/textures/6-seamless-stone-textures-1/
+Grass texture (Public Domain): https://commons.wikimedia.org/wiki/File:Blender3DNoobToPro-Grass.jpg
+
 ## License
 
 Not sure yet...
