@@ -13,9 +13,8 @@ public class Landscape {
         this.surface = renderer.createSurface();
 
         try {
-            this.grassMaterial = renderer.createMaterial("../../res/GX_10_Grass_05.jpg");
-            this.stoneMaterial = renderer.createMaterial("../../res/rock5_512.bmp");
-            this.sandMaterial  = renderer.createMaterial("../../res/out_snd2c_2.BMP");
+            this.grassMaterial = renderer.createMaterial("../../res/CC_Blender3DNoobToPro-Grass.jpg");
+            this.stoneMaterial = renderer.createMaterial("../../res/CC4_stone_1_1024x1024.bmp");
 
             this.surface.setMaterialDefault(this.grassMaterial);
             this.surface.setMaterialSlope(this.stoneMaterial, 0.5f);
