@@ -11,17 +11,17 @@ import gfx.*;
 import gfx.math.*;
 
 public class OpenGLSurface implements Surface {
-    private int[]          vertexHandle    = new int[1];
-    private int            vertexCount     = 0;
-    private int[]          indexHandle     = new int[1];
-    private int            indexCount      = 0;
-    private Material       defaultMaterial = null;
-    private Material       slopeMaterial   = null;
-    private Material       lowMaterial     = null;
-    private float          slope           = 0.5f;
-    private float          elavation       = 0.1f;
-    private OpenGLRenderer renderer        = null;
-    private OpenGLShader   shader          = null;
+    private int[]          vertexHandle              = new int[1];
+    private int            vertexCount               = 0;
+    private int[]          indexHandle               = new int[1];
+    private int            indexCount                = 0;
+    private Material       defaultMaterial           = null;
+    private Material       slopeMaterial             = null;
+    private Material       lowMaterial               = null;
+    private float          slope                     = 0.5f;
+    private float          elavation                 = 0.1f;
+    private OpenGLRenderer renderer                  = null;
+    private OpenGLShader   shader                    = null;
 
     public OpenGLSurface(OpenGLRenderer renderer) {
         this.renderer = renderer;
@@ -249,6 +249,8 @@ public class OpenGLSurface implements Surface {
         this.defaultMaterial.enable();
         this.slopeMaterial.enable();
 
+        this.shader.beginRender();
+
         gl2.glVertexAttribPointer(0, 3, GL.GL_FLOAT, false, 12*Buffers.SIZEOF_FLOAT, 0);
         gl2.glVertexAttribPointer(1, 3, GL.GL_FLOAT, false, 12*Buffers.SIZEOF_FLOAT, 3*Buffers.SIZEOF_FLOAT);
         gl2.glVertexAttribPointer(2, 4, GL.GL_FLOAT, false, 12*Buffers.SIZEOF_FLOAT, 6*Buffers.SIZEOF_FLOAT);
@@ -259,6 +261,8 @@ public class OpenGLSurface implements Surface {
         gl2.glEnableVertexAttribArray(3);
 
         gl2.glDrawElements(GL.GL_TRIANGLE_STRIP, this.indexCount, GL.GL_UNSIGNED_INT, 0);
+
+        this.shader.endRender();
 
         this.slopeMaterial.disable();
         this.defaultMaterial.disable();

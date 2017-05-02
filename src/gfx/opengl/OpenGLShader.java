@@ -10,8 +10,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 
 public class OpenGLShader {
-    private OpenGLRenderer renderer         = null;
-    private int            shaderId         = 0;
+    private OpenGLRenderer renderer                    = null;
+    private int            shaderId                    = 0;
+    private int            modelViewProjectionLocation = 0;
 
     public OpenGLShader(OpenGLRenderer renderer) {
         this.renderer = renderer;
@@ -32,6 +33,9 @@ public class OpenGLShader {
         gl2.glAttachShader(this.shaderId, vertexShaderId);
         gl2.glAttachShader(this.shaderId, fragmentShaderId);
         gl2.glLinkProgram(this.shaderId);
+
+        // Get ModelViewProjection matrix location
+        modelViewProjectionLocation = gl2.glGetUniformLocation(this.shaderId, "in_modelviewprojection");
 
         // Check for errors
         IntBuffer intBuffer = IntBuffer.allocate(1);
@@ -114,6 +118,16 @@ public class OpenGLShader {
     public void enable() {
         GL2 gl2 = this.renderer.getGLAutoDrawable().getGL().getGL2();
         gl2.glUseProgram(this.shaderId);
+    }
+
+    public void beginRender() {
+        GL2 gl2 = this.renderer.getGLAutoDrawable().getGL().getGL2();
+        float[] modelViewProjectionMatrix = this.renderer.getModelViewProjectionMatrix();
+        gl2.glUniformMatrix4fv(modelViewProjectionLocation, 1, true, modelViewProjectionMatrix, 0);
+    }
+
+    public void endRender() {
+
     }
 
     public int getId() {
